@@ -8,8 +8,6 @@ psycopg2-binary>=2.9.6
 
 redis>=4.5.5
 
-hashlib>=20081119
-
 python-dotenv>=1.0.0
 
 validators>=0.20.0
