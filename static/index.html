@@ -767,7 +767,9 @@
                 correctLevel: QRCode.CorrectLevel.H
             });
             
-            qrCodeDiv.style.display = 'block';
+            qrCodeDiv.style.display = 'flex';
+            qrCodeDiv.style.justifyContent = 'center';
+            qrCodeDiv.style.alignItems = 'center';
         });
 
         function addToRecentUrls(urlData) {
