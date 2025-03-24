@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --primary-dark: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #adb5bd;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            background-color: #f5f9ff;
+            color: var(--dark);
+            padding: 0;
+            margin: 0;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1.5rem 0;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 2rem;
+        }
+        
+        .subheader {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-links {
+            margin-top: 1rem;
+        }
+        
+        .nav-links a {
+            color: white;
+            margin: 0 10px;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+        
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .container {
+            max-width: 850px;
+            margin: 2rem auto;
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #eaeaea;
+            margin-bottom: 1.5rem;
+        }
+        
+        .tab {
+            padding: 0.8rem 1.2rem;
+            cursor: pointer;
+            position: relative;
+            font-weight: 500;
+            color: var(--gray);
+            transition: var(--transition);
+        }
+        
+        .tab:hover {
+            color: var(--primary);
+        }
+        
+        .tab.active {
+            color: var(--primary);
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary);
+            border-radius: 3px 3px 0 0;
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: var(--transition);
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button i {
+            margin-right: 0.5rem;
+        }
+        
+        .api-key-container {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .result {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background-color: #f0f7ff;
+            border-radius: var(--border-radius);
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        .short-url {
+            font-weight: 500;
+            color: var(--primary);
+            font-size: 1.2rem;
+            padding: 0.8rem;
+            background-color: white;
+            border-radius: var(--border-radius);
+            margin: 1rem 0;
+            word-break: break-all;
+            text-align: center;
+            border: 1px solid rgba(67, 97, 238, 0.2);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .copy-btn {
+            background-color: var(--success);
+            flex: 1;
+        }
+        
+        .copy-btn:hover {
+            background-color: #3db8de;
+        }
+        
+        .qr-btn {
+            background-color: var(--dark);
+            flex: 1;
+        }
+        
+        .qr-btn:hover {
+            background-color: #343a40;
+        }
+        
+        .error {
+            color: var(--danger);
+            padding: 0.8rem 1rem;
+            background-color: rgba(247, 37, 133, 0.1);
+            border-radius: var(--border-radius);
+            margin-top: 1rem;
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+        
+        .stats-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            box-shadow: var(--box-shadow);
+            animation: fadeIn 0.5s;
+            display: none;
+        }
+        
+        .stats-heading {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary-dark);
+        }
+        
+        .stat-row {
+            display: flex;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            font-weight: 500;
+            width: 30%;
+            color: var(--dark);
+        }
+        
+        .stat-value {
+            flex: 1;
+            overflow-wrap: break-word;
+        }
+        
+        .qr-code-container {
+            text-align: center;
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        .recent-urls {
+            margin-top: 2rem;
+            animation: fadeIn 0.5s;
+        }
+        
+        .recent-heading {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .recent-heading button {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+            background-color: var(--gray);
+        }
+        
+        .url-list {
+            border: 1px solid #eaeaea;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+        
+        .url-item {
+            display: flex;
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid #eaeaea;
+            align-items: center;
+        }
+        
+        .url-item:last-child {
+            border-bottom: none;
+        }
+        
+        .url-item-code {
+            font-weight: 500;
+            color: var(--primary);
+            width: 100px;
+        }
+        
+        .url-item-original {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--dark);
+        }
+        
+        .url-item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .url-item-actions button {
+            padding: 0.4rem;
+            font-size: 0.8rem;
+            background-color: transparent;
+            color: var(--gray);
+        }
+        
+        .url-item-actions button:hover {
+            color: var(--primary);
+            background-color: transparent;
+            transform: none;
+        }
+        
+        .url-item-date {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-top: 0.2rem;
+        }
+        
+        .loading {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            color: var(--primary);
+        }
+        
+        .loading-spinner {
+            border: 3px solid rgba(67, 97, 238, 0.2);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: white;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            border-left: 4px solid var(--success);
+        }
+        
+        .notification.error {
+            border-left: 4px solid var(--danger);
+        }
+        
+        .notification i {
+            font-size: 1.2rem;
+        }
+        
+        .notification.success i {
+            color: var(--success);
+        }
+        
+        .notification.error i {
+            color: var(--danger);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                padding: 1.2rem;
+            }
+            
+            .tab {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .short-url {
+                font-size: 1rem;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .stat-row {
+                flex-direction: column;
+            }
+            
+            .stat-label {
+                width: 100%;
+            }
+            
+            .url-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .url-item-actions {
+                margin-top: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>URL Shortener</h1>
+        <div class="subheader">Create short, memorable links in seconds</div>
+        <div class="nav-links">
+            <a href="/ui/"><i class="fas fa-home"></i> Home</a>
+            <a href="/ui/dashboard.html"><i class="fas fa-chart-bar"></i> Dashboard</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" data-tab="shorten">Create Short URL</div>
+            <div class="tab" data-tab="stats">URL Statistics</div>
+        </div>
+        
+        <div class="api-key-container">
+            <div class="form-group">
+                <label for="api-key"><i class="fas fa-key"></i> API Key (required for statistics)</label>
+                <input type="password" id="api-key" placeholder="Enter your API key">
+            </div>
+        </div>
+        
+        <div class="tab-content active" id="shorten-tab">
+            <div class="form-group">
+                <label for="url"><i class="fas fa-link"></i> URL to Shorten</label>
+                <input type="url" id="url" placeholder="https://example.com/long/path/to/shorten" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="alias"><i class="fas fa-tag"></i> Custom Alias (optional)</label>
+                <input type="text" id="alias" placeholder="e.g., my-custom-link">
+            </div>
+            
+            <div class="form-group">
+                <label for="expires"><i class="fas fa-hourglass-half"></i> Expires After (optional)</label>
+                <select id="expires">
+                    <option value="">Never</option>
+                    <option value="1">1 day</option>
+                    <option value="7">1 week</option>
+                    <option value="30">1 month</option>
+                    <option value="90">3 months</option>
+                    <option value="365">1 year</option>
+                </select>
+            </div>
+            
+            <button id="shorten-btn"><i class="fas fa-cut"></i> Shorten URL</button>
+            
+            <div class="loading" id="shorten-loading">
+                <div class="loading-spinner"></div>
+                <span>Processing...</span>
+            </div>
+            
+            <div class="error" id="error-message"></div>
+            
+            <div class="result" id="result">
+                <div class="stats-heading">Your Shortened URL</div>
+                <div class="short-url" id="short-url"></div>
+                <div class="button-group">
+                    <button class="copy-btn" id="copy-btn"><i class="fas fa-copy"></i> Copy to Clipboard</button>
+                    <button class="qr-btn" id="qr-btn"><i class="fas fa-qrcode"></i> Generate QR Code</button>
+                </div>
+                <div class="qr-code-container" id="qr-code">
+                    <!-- QR code will be inserted here -->
+                </div>
+            </div>
+            
+            <div class="recent-urls" id="recent-urls">
+                <div class="recent-heading">
+                    <span>Recently Shortened URLs</span>
+                    <button id="clear-recent"><i class="fas fa-trash"></i> Clear</button>
+                </div>
+                <div class="url-list" id="url-list">
+                    <!-- Recent URLs will be inserted here -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="stats-tab">
+            <div class="form-group">
+                <label for="short-code"><i class="fas fa-hashtag"></i> Short Code</label>
+                <input type="text" id="short-code" placeholder="Enter the short code" required>
+            </div>
+            
+            <button id="get-stats-btn"><i class="fas fa-chart-line"></i> Get Statistics</button>
+            
+            <div class="loading" id="stats-loading">
+                <div class="loading-spinner"></div>
+                <span>Loading statistics...</span>
+            </div>
+            
+            <div class="error" id="stats-error-message"></div>
+            
+            <div class="stats-container" id="stats-container">
+                <!-- Statistics will be displayed here -->
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <div class="notification-message" id="notification-message"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        const API_BASE_URL = 'http://localhost:8000';
+
+        const shortenBtn = document.getElementById('shorten-btn');
+        const getStatsBtn = document.getElementById('get-stats-btn');
+        const urlInput = document.getElementById('url');
+        const aliasInput = document.getElementById('alias');
+        const expiresSelect = document.getElementById('expires');
+        const shortCodeInput = document.getElementById('short-code');
+        const apiKeyInput = document.getElementById('api-key');
+        const resultDiv = document.getElementById('result');
+        const shortUrlDiv = document.getElementById('short-url');
+        const errorDiv = document.getElementById('error-message');
+        const statsErrorDiv = document.getElementById('stats-error-message');
+        const statsContainer = document.getElementById('stats-container');
+        const copyBtn = document.getElementById('copy-btn');
+        const qrBtn = document.getElementById('qr-btn');
+        const qrCodeDiv = document.getElementById('qr-code');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const shortenLoading = document.getElementById('shorten-loading');
+        const statsLoading = document.getElementById('stats-loading');
+        const notification = document.getElementById('notification');
+        const notificationMessage = document.getElementById('notification-message');
+        const recentUrlsContainer = document.getElementById('recent-urls');
+        const urlList = document.getElementById('url-list');
+        const clearRecentBtn = document.getElementById('clear-recent');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+            });
+        });
+
+        if (localStorage.getItem('urlShortenerApiKey')) {
+            apiKeyInput.value = localStorage.getItem('urlShortenerApiKey');
+        }
+
+        shortenBtn.addEventListener('click', async () => {
+            const url = urlInput.value;
+            const alias = aliasInput.value;
+            const expires = expiresSelect.value;
+            
+            if (!url) {
+                showError('Please enter a URL');
+                return;
+            }
+            
+            shortenLoading.style.display = 'flex';
+            errorDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/shorten`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        original_url: url,
+                        alias: alias || undefined,
+                        expires_in_days: expires ? parseInt(expires) : undefined
+                    })
+                });
+                
+                const data = await response.json();
+                
+                shortenLoading.style.display = 'none';
+                
+                if (!response.ok) {
+                    showError(data.detail || 'Failed to shorten URL');
+                    return;
+                }
+                
+                shortUrlDiv.textContent = data.short_url;
+                resultDiv.style.display = 'block';
+                errorDiv.style.display = 'none';
+                
+                if (apiKeyInput.value) {
+                    localStorage.setItem('urlShortenerApiKey', apiKeyInput.value);
+                }
+                
+                addToRecentUrls(data);
+                
+                showNotification('URL successfully shortened!', 'success');
+                
+                qrCodeDiv.innerHTML = '';
+                qrCodeDiv.style.display = 'none';
+                
+            } catch (error) {
+                shortenLoading.style.display = 'none';
+                showError('An error occurred. Please try again.');
+                console.error(error);
+            }
+        });
+
+        getStatsBtn.addEventListener('click', async () => {
+            const shortCode = shortCodeInput.value;
+            const apiKey = apiKeyInput.value;
+            
+            if (!shortCode) {
+                showStatsError('Please enter a short code');
+                return;
+            }
+            
+            if (!apiKey) {
+                showStatsError('API key is required for fetching statistics');
+                return;
+            }
+            
+            statsLoading.style.display = 'flex';
+            statsErrorDiv.style.display = 'none';
+            statsContainer.style.display = 'none';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/stats/${shortCode}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-API-Key': apiKey
+                    }
+                });
+                
+                statsLoading.style.display = 'none';
+                
+                if (!response.ok) {
+                    const data = await response.json();
+                    showStatsError(data.detail || 'Failed to fetch statistics');
+                    return;
+                }
+                
+                const data = await response.json();
+                
+                localStorage.setItem('urlShortenerApiKey', apiKey);
+                
+                const createdDate = new Date(data.created_at).toLocaleString();
+                const expiresDate = data.expires_at ? new Date(data.expires_at).toLocaleString() : 'Never';
+                
+                statsContainer.innerHTML = `
+                    <div class="stats-heading">Statistics for: ${shortCode}</div>
+                    <div class="stat-row">
+                        <div class="stat-label">Original URL:</div>
+                        <div class="stat-value">${data.original_url}</div>
+                    </div>
+                    <div class="stat-row">
+                        <div class="stat-label">Clicks:</div>
+                        <div class="stat-value">${data.clicks}</div>
+                    </div>
+                    <div class="stat-row">
+                        <div class="stat-label">Created:</div>
+                        <div class="stat-value">${createdDate}</div>
+                    </div>
+                    <div class="stat-row">
+                        <div class="stat-label">Expires:</div>
+                        <div class="stat-value">${expiresDate}</div>
+                    </div>
+                `;
+                statsContainer.style.display = 'block';
+                statsErrorDiv.style.display = 'none';
+                
+            } catch (error) {
+                statsLoading.style.display = 'none';
+                showStatsError('An error occurred. Please try again.');
+                console.error(error);
+            }
+        });
+
+        copyBtn.addEventListener('click', () => {
+            const shortUrl = shortUrlDiv.textContent;
+            navigator.clipboard.writeText(shortUrl)
+                .then(() => {
+                    showNotification('URL copied to clipboard!', 'success');
+                })
+                .catch(err => {
+                    showNotification('Failed to copy URL', 'error');
+                    console.error('Failed to copy: ', err);
+                });
+        });
+
+        qrBtn.addEventListener('click', () => {
+            qrCodeDiv.innerHTML = '';
+            const shortUrl = shortUrlDiv.textContent;
+            
+            new QRCode(qrCodeDiv, {
+                text: shortUrl,
+                width: 128,
+                height: 128,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            
+            qrCodeDiv.style.display = 'block';
+        });
+
+        function addToRecentUrls(urlData) {
+            let recentUrls = JSON.parse(localStorage.getItem('recentUrls') || '[]');
+            
+            const existingIndex = recentUrls.findIndex(item => item.short_code === urlData.short_code);
+            if (existingIndex >= 0) {
+                recentUrls.splice(existingIndex, 1);
+            }
+            
+            recentUrls.unshift(urlData);
+            
+            if (recentUrls.length > 10) {
+                recentUrls = recentUrls.slice(0, 10);
+            }
+            
+            localStorage.setItem('recentUrls', JSON.stringify(recentUrls));
+            updateRecentUrlsList();
+        }
+
+        function updateRecentUrlsList() {
+            const recentUrls = JSON.parse(localStorage.getItem('recentUrls') || '[]');
+            
+            if (recentUrls.length === 0) {
+                recentUrlsContainer.style.display = 'none';
+                return;
+            }
+            
+            urlList.innerHTML = '';
+            recentUrls.forEach(urlData => {
+                const createdDate = new Date(urlData.created_at).toLocaleString();
+                
+                const urlItem = document.createElement('div');
+                urlItem.className = 'url-item';
+                urlItem.innerHTML = `
+                    <div class="url-item-code">${urlData.short_code}</div>
+                    <div class="url-item-original" title="${urlData.original_url}">${urlData.original_url}</div>
+                    <div class="url-item-actions">
+                        <button class="copy-recent" data-url="${urlData.short_url}">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button class="stats-recent" data-code="${urlData.short_code}">
+                            <i class="fas fa-chart-bar"></i>
+                        </button>
+                    </div>
+                `;
+                
+                urlList.appendChild(urlItem);
+            });
+            
+            recentUrlsContainer.style.display = 'block';
+            
+            document.querySelectorAll('.copy-recent').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    navigator.clipboard.writeText(btn.dataset.url)
+                        .then(() => showNotification('URL copied to clipboard!', 'success'))
+                        .catch(() => showNotification('Failed to copy URL', 'error'));
+                });
+            });
+            
+            document.querySelectorAll('.stats-recent').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    document.querySelector('.tab[data-tab="stats"]').classList.add('active');
+                    document.getElementById('stats-tab').classList.add('active');
+                    
+                    shortCodeInput.value = btn.dataset.code;
+                    
+                    if (apiKeyInput.value) {
+                        getStatsBtn.click();
+                    }
+                });
+            });
+        }
+
+        clearRecentBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear your recent URLs?')) {
+                localStorage.removeItem('recentUrls');
+                recentUrlsContainer.style.display = 'none';
+                showNotification('Recent URLs cleared', 'success');
+            }
+        });
+
+        function showError(message) {
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            resultDiv.style.display = 'none';
+        }
+
+        function showStatsError(message) {
+            statsErrorDiv.textContent = message;
+            statsErrorDiv.style.display = 'block';
+            statsContainer.style.display = 'none';
+        }
+
+        function showNotification(message, type = 'success') {
+            notification.className = 'notification ' + type;
+            notificationMessage.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        updateRecentUrlsList();
+        
+        urlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') shortenBtn.click();
+        });
+        
+        aliasInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') shortenBtn.click();
+        });
+        
+        shortCodeInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') getStatsBtn.click();
+        });
+    </script>
+</body>
+</html>

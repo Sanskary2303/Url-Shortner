@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --primary-dark: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #adb5bd;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            background-color: #f5f9ff;
+            color: var(--dark);
+            padding: 0;
+            margin: 0;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1.5rem 0;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 2rem;
+        }
+        
+        .subheader {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-links {
+            margin-top: 1rem;
+        }
+        
+        .nav-links a {
+            color: white;
+            margin: 0 10px;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+        
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .api-key-form {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        input[type="text"], input[type="password"], input[type="search"] {
+            padding: 0.8rem 1rem;
+            border: 1px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: var(--transition);
+            flex: 1;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button i {
+            margin-right: 0.5rem;
+        }
+        
+        .search-filter {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .filter-toggle {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        
+        .filter-toggle input {
+            margin-right: 0.3rem;
+        }
+        
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .stat-card {
+            flex: 1;
+            min-width: 200px;
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eaeaea;
+            transition: var(--transition);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-card h3 {
+            margin-top: 0;
+            color: var(--primary-dark);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            line-height: 1.2;
+            margin: 0.5rem 0;
+        }
+        
+        .stat-card.total .number {
+            color: var(--primary);
+        }
+        
+        .stat-card.active .number {
+            color: var(--success);
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            border: 1px solid #eaeaea;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 1rem 1.2rem;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: var(--primary-dark);
+            position: relative;
+            cursor: pointer;
+        }
+        
+        th:hover {
+            background-color: #f0f2f5;
+        }
+        
+        th i {
+            margin-left: 0.3rem;
+            font-size: 0.8rem;
+        }
+        
+        tr {
+            border-bottom: 1px solid #eaeaea;
+            transition: var(--transition);
+        }
+        
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        tr:last-child {
+            border-bottom: none;
+        }
+        
+        .url-cell {
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 0.3rem 0.7rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .active {
+            background-color: rgba(76, 201, 240, 0.2);
+            color: var(--success);
+        }
+        
+        .expired {
+            background-color: rgba(247, 37, 133, 0.2);
+            color: var(--danger);
+        }
+        
+        .action-cell {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .action-btn {
+            padding: 0.4rem;
+            background-color: transparent;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        .action-btn:hover {
+            color: var(--primary);
+            background-color: transparent;
+            transform: none;
+        }
+        
+        .action-btn.copy:hover {
+            color: var(--success);
+        }
+        
+        .action-btn.delete:hover {
+            color: var(--danger);
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1.5rem;
+        }
+        
+        .page-info {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+        
+        .page-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .error {
+            color: var(--danger);
+            padding: 1rem;
+            background-color: rgba(247, 37, 133, 0.1);
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .loading {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 2rem 0;
+            color: var(--primary);
+        }
+        
+        .loading-spinner {
+            border: 3px solid rgba(67, 97, 238, 0.2);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray);
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+        
+        .empty-state p {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: white;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            border-left: 4px solid var(--success);
+        }
+        
+        .notification.error {
+            border-left: 4px solid var(--danger);
+        }
+        
+        .notification i {
+            font-size: 1.2rem;
+        }
+        
+        .notification.success i {
+            color: var(--success);
+        }
+        
+        .notification.error i {
+            color: var(--danger);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            max-width: 500px;
+            width: 100%;
+            animation: modalFadeIn 0.3s;
+        }
+        
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+            padding: 0;
+        }
+        
+        .modal-body {
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+        
+        .cancel-btn {
+            background-color: #f8f9fa;
+            color: var(--dark);
+        }
+        
+        .delete-btn {
+            background-color: var(--danger);
+        }
+        
+        .delete-btn:hover {
+            background-color: #d90863;
+        }
+        
+        .home-link {
+            display: block;
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .home-link:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+            
+            .dashboard-header, .search-filter {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .api-key-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .stats-container {
+                flex-direction: column;
+            }
+            
+            .stat-card {
+                width: 100%;
+            }
+            
+            .action-cell {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>URL Shortener Dashboard</h1>
+        <div class="subheader">Manage and track your shortened URLs</div>
+        <div class="nav-links">
+            <a href="/ui/"><i class="fas fa-home"></i> Home</a>
+            <a href="/ui/dashboard.html"><i class="fas fa-chart-bar"></i> Dashboard</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="dashboard-header">
+            <div class="api-key-form">
+                <input type="password" id="api-key" placeholder="Enter your API key">
+                <button id="load-data-btn"><i class="fas fa-sync-alt"></i> Load Data</button>
+            </div>
+            
+            <div class="search-filter">
+                <input type="search" id="search-input" placeholder="Search URLs...">
+                <label class="filter-toggle">
+                    <input type="checkbox" id="active-only"> Active only
+                </label>
+            </div>
+        </div>
+        
+        <div class="error" id="error-message"></div>
+        
+        <div class="stats-container">
+            <div class="stat-card total">
+                <h3>Total URLs</h3>
+                <div class="number" id="total-count">-</div>
+            </div>
+            <div class="stat-card active">
+                <h3>Active URLs</h3>
+                <div class="number" id="active-count">-</div>
+            </div>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <span>Loading URLs...</span>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th data-sort="short_code">Short Code <i class="fas fa-sort"></i></th>
+                        <th data-sort="original_url">Original URL <i class="fas fa-sort"></i></th>
+                        <th data-sort="clicks">Clicks <i class="fas fa-sort"></i></th>
+                        <th data-sort="created_at">Created At <i class="fas fa-sort"></i></th>
+                        <th data-sort="expires_at">Expires At <i class="fas fa-sort"></i></th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="url-list">
+                    <!-- URL data will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="pagination">
+            <div class="page-info" id="page-info">
+                Showing 0-0 of 0 URLs
+            </div>
+            <div class="page-buttons">
+                <button id="prev-btn" disabled><i class="fas fa-chevron-left"></i> Previous</button>
+                <button id="next-btn" disabled>Next <i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+        
+        <a href="/ui/" class="home-link"><i class="fas fa-arrow-left"></i> Back to URL Shortener</a>
+    </div>
+    
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <div class="notification-message" id="notification-message"></div>
+    </div>
+    
+    <div class="modal" id="delete-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Delete URL</div>
+                <button class="close-modal" id="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this URL? This action cannot be undone.</p>
+                <p><strong>Short code:</strong> <span id="delete-short-code"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-btn" id="cancel-delete">Cancel</button>
+                <button class="delete-btn" id="confirm-delete">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8000';
+        const PAGE_SIZE = 10;
+        
+        let currentPage = 0;
+        let totalUrls = 0;
+        let activeOnly = false;
+        let currentData = [];
+        let sortColumn = 'created_at';
+        let sortDirection = 'desc';
+        let searchQuery = '';
+        let deleteShortCode = '';
+        
+        const apiKeyInput = document.getElementById('api-key');
+        const loadDataBtn = document.getElementById('load-data-btn');
+        const activeOnlyCheckbox = document.getElementById('active-only');
+        const searchInput = document.getElementById('search-input');
+        const errorDiv = document.getElementById('error-message');
+        const totalCountDiv = document.getElementById('total-count');
+        const activeCountDiv = document.getElementById('active-count');
+        const urlListTbody = document.getElementById('url-list');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const loadingDiv = document.getElementById('loading');
+        const pageInfoDiv = document.getElementById('page-info');
+        const sortHeaders = document.querySelectorAll('th[data-sort]');
+        const notification = document.getElementById('notification');
+        const notificationMessage = document.getElementById('notification-message');
+        const deleteModal = document.getElementById('delete-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const cancelDeleteBtn = document.getElementById('cancel-delete');
+        const confirmDeleteBtn = document.getElementById('confirm-delete');
+        const deleteShortCodeSpan = document.getElementById('delete-short-code');
+        
+        if (localStorage.getItem('urlShortenerApiKey')) {
+            apiKeyInput.value = localStorage.getItem('urlShortenerApiKey');
+            setTimeout(() => loadData(), 500);
+        }
+        
+        sortHeaders.forEach(header => {
+            header.addEventListener('click', () => {
+                const column = header.dataset.sort;
+                
+                if (sortColumn === column) {
+                    sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+                } else {
+                    sortColumn = column;
+                    sortDirection = 'asc';
+                }
+                
+                sortHeaders.forEach(h => {
+                    const icon = h.querySelector('i');
+                    if (h.dataset.sort === sortColumn) {
+                        icon.className = sortDirection === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
+                    } else {
+                        icon.className = 'fas fa-sort';
+                    }
+                });
+                
+                loadData();
+            });
+        });
+        
+        async function loadData() {
+            const apiKey = apiKeyInput.value;
+            if (!apiKey) {
+                showError('Please enter your API key');
+                return;
+            }
+            
+            localStorage.setItem('urlShortenerApiKey', apiKey);
+            
+            activeOnly = activeOnlyCheckbox.checked;
+            const skip = currentPage * PAGE_SIZE;
+            
+            loadingDiv.style.display = 'flex';
+            errorDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/admin/urls?active_only=${activeOnly}&skip=${skip}&limit=${PAGE_SIZE}`,
+                    {
+                        headers: {
+                            'X-API-Key': apiKey
+                        }
+                    }
+                );
+                
+                loadingDiv.style.display = 'none';
+                
+                if (!response.ok) {
+                    const data = await response.json();
+                    showError(data.detail || 'Failed to load URL data');
+                    return;
+                }
+                
+                const data = await response.json();
+                
+                totalCountDiv.textContent = data.total_count;
+                activeCountDiv.textContent = data.active_count;
+                totalUrls = data.total_count;
+                
+                currentData = data.urls;
+                
+                if (sortColumn) {
+                    currentData.sort((a, b) => {
+                        if (a[sortColumn] === null) return 1;
+                        if (b[sortColumn] === null) return -1;
+                        
+                        if (sortColumn === 'clicks') {
+                            return sortDirection === 'asc' 
+                                ? a[sortColumn] - b[sortColumn]
+                                : b[sortColumn] - a[sortColumn];
+                        }
+                        
+                        const aValue = String(a[sortColumn]).toLowerCase();
+                        const bValue = String(b[sortColumn]).toLowerCase();
+                        
+                        if (sortDirection === 'asc') {
+                            return aValue.localeCompare(bValue);
+                        } else {
+                            return bValue.localeCompare(aValue);
+                        }
+                    });
+                }
+                
+                if (searchQuery) {
+                    const query = searchQuery.toLowerCase();
+                    currentData = currentData.filter(url => 
+                        url.short_code.toLowerCase().includes(query) || 
+                        url.original_url.toLowerCase().includes(query)
+                    );
+                }
+                
+                updateUrlTable();
+                
+                updatePagination();
+                
+            } catch (error) {
+                loadingDiv.style.display = 'none';
+                showError('An error occurred. Please try again.');
+                console.error(error);
+            }
+        }
+        
+        function updateUrlTable() {
+            urlListTbody.innerHTML = '';
+            
+            if (currentData.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td colspan="7">
+                        <div class="empty-state">
+                            <i class="fas fa-search"></i>
+                            <p>No URLs found</p>
+                            <span>Try adjusting your search or filters</span>
+                        </div>
+                    </td>
+                `;
+                urlListTbody.appendChild(row);
+                return;
+            }
+            
+            currentData.forEach(url => {
+                const isActive = url.is_active;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${url.short_code}</td>
+                    <td class="url-cell" title="${url.original_url}">${url.original_url}</td>
+                    <td>${url.clicks}</td>
+                    <td>${new Date(url.created_at).toLocaleString()}</td>
+                    <td>${url.expires_at ? new Date(url.expires_at).toLocaleString() : 'Never'}</td>
+                    <td><span class="status ${isActive ? 'active' : 'expired'}">${isActive ? 'Active' : 'Expired'}</span></td>
+                    <td class="action-cell">
+                        <button class="action-btn copy" data-url="${url.short_url}" title="Copy URL">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button class="action-btn" data-code="${url.short_code}" title="View Statistics">
+                            <i class="fas fa-chart-line"></i>
+                        </button>
+                        <button class="action-btn delete" data-code="${url.short_code}" title="Delete URL">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                `;
+                urlListTbody.appendChild(row);
+            });
+            
+            document.querySelectorAll('.action-btn.copy').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const url = btn.dataset.url;
+                    navigator.clipboard.writeText(url)
+                        .then(() => showNotification('URL copied to clipboard!', 'success'))
+                        .catch(() => showNotification('Failed to copy URL', 'error'));
+                });
+            });
+            
+            document.querySelectorAll('.action-btn.delete').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    deleteShortCode = btn.dataset.code;
+                    deleteShortCodeSpan.textContent = deleteShortCode;
+                    deleteModal.style.display = 'flex';
+                });
+            });
+        }
+        
+        function updatePagination() {
+            const totalPages = Math.ceil(totalUrls / PAGE_SIZE);
+            const start = currentPage * PAGE_SIZE + 1;
+            const end = Math.min((currentPage + 1) * PAGE_SIZE, totalUrls);
+            
+            pageInfoDiv.textContent = totalUrls > 0 
+                ? `Showing ${start}-${end} of ${totalUrls} URLs`
+                : 'No URLs found';
+            
+            prevBtn.disabled = currentPage === 0;
+            nextBtn.disabled = currentPage >= totalPages - 1 || totalUrls === 0;
+        }
+        
+        async function deleteUrl(shortCode) {
+            const apiKey = apiKeyInput.value;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/${shortCode}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-API-Key': apiKey
+                    }
+                });
+                
+                if (!response.ok) {
+                    const data = await response.json();
+                    showNotification(data.detail || 'Failed to delete URL', 'error');
+                    return false;
+                } else {
+                    showNotification('URL deleted successfully!', 'success');
+                    currentPage = 0;
+                    loadData();
+                    return true;
+                }
+            } catch (error) {
+                console.error(error);
+                showNotification('An error occurred. Please try again.', 'error');
+                return false;
+            }
+        }
+
+        function showError(message) {
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function showNotification(message, type = 'success') {
+            const iconClass = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+            notification.querySelector('i').className = iconClass;
+            notification.className = `notification ${type}`;
+            notificationMessage.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value.trim();
+            currentPage = 0;
+            loadData();
+        });
+
+        activeOnlyCheckbox.addEventListener('change', () => {
+            currentPage = 0;
+            loadData();
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentPage > 0) {
+                currentPage--;
+                loadData();
+            }
+        });
+        
+        nextBtn.addEventListener('click', () => {
+            currentPage++;
+            loadData();
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            deleteModal.style.display = 'none';
+        });
+        
+        cancelDeleteBtn.addEventListener('click', () => {
+            deleteModal.style.display = 'none';
+        });
+        
+        confirmDeleteBtn.addEventListener('click', async () => {
+            const originalContent = confirmDeleteBtn.innerHTML;
+            confirmDeleteBtn.innerHTML = '<div class="loading-spinner"></div>';
+            confirmDeleteBtn.disabled = true;
+            
+            const success = await deleteUrl(deleteShortCode);
+            
+            if (success) {
+                deleteModal.style.display = 'none';
+            }
+            
+            confirmDeleteBtn.innerHTML = originalContent;
+            confirmDeleteBtn.disabled = false;
+        });
+        
+        deleteModal.addEventListener('click', (e) => {
+            if (e.target === deleteModal) {
+                deleteModal.style.display = 'none';
+            }
+        });
+        
+        if (apiKeyInput.value) {
+            loadData();
+        }
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && deleteModal.style.display === 'flex') {
+                deleteModal.style.display = 'none';
+            }
+            
+            if (e.key === 'Enter' && apiKeyInput === document.activeElement) {
+                loadData();
+            }
+        });
+    </script>
+</body>
+</html>
