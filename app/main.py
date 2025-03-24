@@ -74,7 +74,7 @@ class RequestSizeLimiter(BaseHTTPMiddleware):
         
         return await call_next(request)
 
-app.add_middleware(RequestSizeLimiter, max_content_length_bytes=1024 * 1024)  # 1MB limit
+app.add_middleware(RequestSizeLimiter, max_content_length_bytes=1024 * 1024)
 
 @app.post("/shorten", response_model=schemas.URLResponse, dependencies=[Depends(rate_limiter)])
 def create_short_url(url_data: schemas.URLCreate, db: Session = Depends(get_db)):

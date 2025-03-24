@@ -25,9 +25,7 @@ async def get_api_key(
             detail="Missing API key",
         )
     
-    # Validate the API key using the key rotation manager
     if not KeyRotationManager.validate_key(api_key_header):
-        # Fallback to checking against the primary key in secrets manager/env
         primary_key = secrets_manager.get_api_key()
         if api_key_header != primary_key:
             raise HTTPException(

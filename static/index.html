@@ -270,7 +270,7 @@
             display: flex;
             padding: 0.8rem 0;
             border-bottom: 1px solid #eaeaea;
-            flex-direction: column;  /* Stack label and value for better readability */
+            flex-direction: column;
         }
         
         .stat-row:last-child {
@@ -325,27 +325,26 @@
             border-radius: var(--border-radius);
             overflow: hidden;
         }
-        
-        /* Update these styles to fix the long alias issue */
+
         .url-item {
             display: flex;
             padding: 0.8rem 1rem;
             border-bottom: 1px solid #eaeaea;
             align-items: center;
-            flex-wrap: wrap; /* Allow items to wrap on smaller screens */
-            gap: 8px; /* Space between elements */
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .url-item-code {
             font-weight: 500;
             color: var(--primary);
             min-width: 80px;
-            max-width: 150px; /* Limit maximum width */
+            max-width: 150px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             padding-right: 10px;
-            border-right: 1px solid #eaeaea; /* Visual separator */
+            border-right: 1px solid #eaeaea;
         }
 
         .url-item-original {
@@ -354,16 +353,15 @@
             text-overflow: ellipsis;
             white-space: nowrap;
             color: var(--dark);
-            min-width: 150px; /* Ensure minimum width for readability */
+            min-width: 150px;
         }
 
         .url-item-actions {
             display: flex;
             gap: 0.5rem;
-            margin-left: auto; /* Push actions to the right */
+            margin-left: auto;
         }
 
-        /* Improved responsiveness for different screen sizes */
         @media (max-width: 768px) {
             .url-item {
                 flex-direction: column;
@@ -497,8 +495,7 @@
 
         @media (min-width: 768px) {
             .stat-row {
-                flex-direction: row;  /* Side by side on larger screens */
-            }
+                flex-direction: row;
             
             .stat-label {
                 width: 30%;
