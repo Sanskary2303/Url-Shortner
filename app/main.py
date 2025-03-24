@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Depends, Request, Response, status
 from fastapi.responses import RedirectResponse, JSONResponse
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, text
 from . import models, schemas, utils
 from .database import engine, get_db
 import validators
@@ -235,6 +235,39 @@ def create_bulk_short_urls(urls_data: schemas.BulkURLCreate, db: Session = Depen
     
     return {"urls": results}
 
+@app.get("/health", tags=["Health"])
+def health_check():
+    """
+    Health check endpoint
+    
+    Returns the status of the service and its dependencies
+    """
+    health_status = {
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat(),
+        "version": app.version,
+    }
+    
+    try:
+        with engine.connect() as connection:
+            result = connection.execute(text("SELECT 1"))
+            result.scalar()
+        health_status["database"] = "connected"
+    except Exception as e:
+        health_status["database"] = "error"
+        health_status["database_error"] = str(e)
+        health_status["status"] = "unhealthy"
+    
+    try:
+        redis_client.ping()
+        health_status["cache"] = "connected"
+    except Exception as e:
+        health_status["cache"] = "error"
+        health_status["cache_error"] = str(e)
+        health_status["status"] = "unhealthy"
+    
+    return health_status
+
 @app.get("/{short_code}", dependencies=[Depends(rate_limiter)])
 def redirect_to_url(
     short_code: str, 
@@ -427,39 +460,6 @@ def delete_url(short_code: str, db: Session = Depends(get_db)):
     cache.invalidate_url_cache(short_code)
     
     return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-@app.get("/health", tags=["Health"])
-def health_check():
-    """
-    Health check endpoint
-    
-    Returns the status of the service and its dependencies
-    """
-    health_status = {
-        "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat(),
-        "version": app.version,
-    }
-    
-    try:
-        with engine.connect() as connection:
-            result = connection.execute("SELECT 1")
-            result.scalar()
-        health_status["database"] = "connected"
-    except Exception as e:
-        health_status["database"] = "error"
-        health_status["database_error"] = str(e)
-        health_status["status"] = "unhealthy"
-    
-    try:
-        redis_client.ping()
-        health_status["cache"] = "connected"
-    except Exception as e:
-        health_status["cache"] = "error"
-        health_status["cache_error"] = str(e)
-        health_status["status"] = "unhealthy"
-    
-    return health_status
 
 def custom_openapi():
     if app.openapi_schema:

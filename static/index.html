@@ -255,6 +255,8 @@
             box-shadow: var(--box-shadow);
             animation: fadeIn 0.5s;
             display: none;
+            max-width: 100%;
+            overflow: hidden;
         }
         
         .stats-heading {
@@ -266,8 +268,9 @@
         
         .stat-row {
             display: flex;
-            padding: 0.6rem 0;
+            padding: 0.8rem 0;
             border-bottom: 1px solid #eaeaea;
+            flex-direction: column;  /* Stack label and value for better readability */
         }
         
         .stat-row:last-child {
@@ -276,13 +279,18 @@
         
         .stat-label {
             font-weight: 500;
-            width: 30%;
+            width: 100%;
             color: var(--dark);
+            margin-bottom: 0.3rem;
         }
         
         .stat-value {
             flex: 1;
             overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
+            hyphens: auto;
+            max-width: 100%;
         }
         
         .qr-code-container {
@@ -318,47 +326,67 @@
             overflow: hidden;
         }
         
+        /* Update these styles to fix the long alias issue */
         .url-item {
             display: flex;
             padding: 0.8rem 1rem;
             border-bottom: 1px solid #eaeaea;
             align-items: center;
+            flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+            gap: 8px; /* Space between elements */
         }
-        
-        .url-item:last-child {
-            border-bottom: none;
-        }
-        
+
         .url-item-code {
             font-weight: 500;
             color: var(--primary);
-            width: 100px;
+            min-width: 80px;
+            max-width: 150px; /* Limit maximum width */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding-right: 10px;
+            border-right: 1px solid #eaeaea; /* Visual separator */
         }
-        
+
         .url-item-original {
             flex: 1;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
             color: var(--dark);
+            min-width: 150px; /* Ensure minimum width for readability */
         }
-        
+
         .url-item-actions {
             display: flex;
             gap: 0.5rem;
+            margin-left: auto; /* Push actions to the right */
         }
-        
-        .url-item-actions button {
-            padding: 0.4rem;
-            font-size: 0.8rem;
-            background-color: transparent;
-            color: var(--gray);
+
+        /* Improved responsiveness for different screen sizes */
+        @media (max-width: 768px) {
+            .url-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .url-item-code {
+                border-right: none;
+                border-bottom: 1px solid #eaeaea;
+                padding-bottom: 5px;
+                margin-bottom: 5px;
+                max-width: 100%;
+                width: 100%;
+            }
+            
+            .url-item-actions {
+                margin-left: 0;
+                margin-top: 8px;
+            }
         }
-        
-        .url-item-actions button:hover {
-            color: var(--primary);
-            background-color: transparent;
-            transform: none;
+
+        .url-item:last-child {
+            border-bottom: none;
         }
         
         .url-item-date {
@@ -464,6 +492,21 @@
             
             .url-item-actions {
                 margin-top: 0.5rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .stat-row {
+                flex-direction: row;  /* Side by side on larger screens */
+            }
+            
+            .stat-label {
+                width: 30%;
+                margin-bottom: 0;
+            }
+            
+            .stat-value {
+                flex: 1;
             }
         }
     </style>

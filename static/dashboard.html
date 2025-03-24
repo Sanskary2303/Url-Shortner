@@ -471,6 +471,14 @@
         
         .modal-body {
             margin-bottom: 1.5rem;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .modal-body a {
+            max-width: 100%;
+            display: inline-block;
+            word-break: break-all;  /* Ensures URLs break properly */
         }
         
         .modal-footer {
@@ -531,6 +539,15 @@
             
             .action-cell {
                 flex-wrap: wrap;
+            }
+        }
+
+        /* Make modal responsive on smaller screens */
+        @media (max-width: 550px) {
+            .modal-content {
+                width: 90%;
+                max-width: 90%;
+                margin: 0 10px;
             }
         }
     </style>
@@ -839,6 +856,96 @@
                     deleteModal.style.display = 'flex';
                 });
             });
+
+            document.querySelectorAll('.action-btn:not(.copy):not(.delete)').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const shortCode = btn.dataset.code;
+                    
+                    try {
+                        const existingModal = document.getElementById('stats-modal');
+                        if (existingModal) {
+                            document.body.removeChild(existingModal);
+                        }
+                        
+                        const apiKey = apiKeyInput.value;
+                        const response = await fetch(`${API_BASE_URL}/stats/${shortCode}`, {
+                            headers: {
+                                'X-API-Key': apiKey
+                            }
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch statistics');
+                        }
+                        
+                        const stats = await response.json();
+                        
+                        const shortUrl = stats.short_url || `${API_BASE_URL}/${shortCode}`;
+                        
+                        const statsHtml = `
+                            <div class="modal-header">
+                                <div class="modal-title">URL Statistics</div>
+                                <button class="close-modal" id="close-stats-modal">&times;</button>
+                            </div>
+                            <div class="modal-body">
+                                <p><strong>Short Code:</strong> ${shortCode}</p>
+                                <p><strong>Original URL:</strong> <a href="${stats.original_url}" target="_blank">${stats.original_url}</a></p>
+                                <p><strong>Created:</strong> ${new Date(stats.created_at).toLocaleString()}</p>
+                                <p><strong>Expires:</strong> ${stats.expires_at ? new Date(stats.expires_at).toLocaleString() : 'Never'}</p>
+                                <p><strong>Total Clicks:</strong> ${stats.clicks}</p>
+                                <hr>
+                                <p><strong>Short URL:</strong> <a href="${shortUrl}" target="_blank">${shortUrl}</a></p>
+                                <p><strong>QR Code:</strong></p>
+                                <div id="stats-qr-code" style="text-align: center; margin-top: 10px;"></div>
+                            </div>
+                        `;
+                        
+                        const statsModal = document.createElement('div');
+                        statsModal.className = 'modal';
+                        statsModal.id = 'stats-modal';
+                        statsModal.style.display = 'flex';
+                        
+                        const modalContent = document.createElement('div');
+                        modalContent.className = 'modal-content';
+                        modalContent.innerHTML = statsHtml;
+                        
+                        statsModal.appendChild(modalContent);
+                        document.body.appendChild(statsModal);
+                        
+                        setTimeout(() => {
+                            try {
+                                new QRCode(document.getElementById("stats-qr-code"), {
+                                    text: shortUrl,
+                                    width: 128,
+                                    height: 128,
+                                    colorDark: "#000000",
+                                    colorLight: "#ffffff",
+                                    correctLevel: QRCode.CorrectLevel.H
+                                });
+                                
+                                const closeButton = document.getElementById('close-stats-modal');
+                                if (closeButton) {
+                                    closeButton.onclick = function() {
+                                        document.body.removeChild(statsModal);
+                                    };
+                                }
+                                
+                                statsModal.onclick = function(e) {
+                                    if (e.target === statsModal) {
+                                        document.body.removeChild(statsModal);
+                                    }
+                                };
+                            } catch (error) {
+                                console.error("QR code error:", error);
+                            }
+                        }, 100);
+                        
+                    } catch (error) {
+                        console.error(error);
+                        showNotification('Failed to load statistics', 'error');
+                    }
+                });
+            });
         }
         
         function updatePagination() {
@@ -965,5 +1072,6 @@
             }
         });
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </body>
 </html>

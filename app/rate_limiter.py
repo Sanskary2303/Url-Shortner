@@ -16,7 +16,7 @@ async def rate_limiter(request: Request):
     if not RATE_LIMIT_ENABLED:
         return
         
-    if request.url.path.startswith("/static") or request.url.path.startswith("/ui"):
+    if request.url.path.startswith("/static") or request.url.path.startswith("/ui") or request.url.path == "/health":
         return
         
     client_ip = request.client.host
